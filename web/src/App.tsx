@@ -10,6 +10,12 @@ import { readUrl, writeUrl } from "./lib/urlState";
 import type { DraftClass } from "./types";
 
 const dataUrl = (path: string) => `${import.meta.env.BASE_URL}data/${path}`;
+/**
+ * GitHub Pages lets browsers reuse files for 10 minutes. After a data rebuild that would
+ * pair an old years.json with new class files (or the reverse), so always revalidate:
+ * an unchanged file still comes back as a cheap "not modified".
+ */
+const fetchData = (path: string) => fetch(dataUrl(path), { cache: "no-cache" });
 const initial = readUrl(window.location.search);
 const COMPACT_QUERY = "(max-width: 560px)";
 
@@ -42,7 +48,7 @@ export default function App() {
   const compact = useMediaQuery(COMPACT_QUERY);
 
   useEffect(() => {
-    fetch(dataUrl("years.json"))
+    fetchData("years.json")
       .then((r) => r.json())
       .then((ys: number[]) => {
         setYears(ys);
@@ -60,7 +66,7 @@ export default function App() {
       return;
     }
     let live = true;
-    fetch(dataUrl(`${year}.json`))
+    fetchData(`${year}.json`)
       .then((r) => r.json())
       .then((c: DraftClass) => {
         cache.current.set(year, c);
