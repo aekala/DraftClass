@@ -24,6 +24,8 @@ Every push to `main` runs `.github/workflows/deploy.yml`, which tests and builds
 
 During the season, run `pipeline/.venv/bin/python pipeline/fetch.py --refresh` and then `build.py` to pick up new stats.
 
+A draft class only appears once its rookie season has finished, Super Bowl included. Until March 2027 the newest class is 2025; after that, rebuilding the data adds 2026, and so on each year.
+
 ## How it works
 
 **Data** ([nflverse](https://github.com/nflverse/nflverse-data), free):

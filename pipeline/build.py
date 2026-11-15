@@ -5,6 +5,7 @@ Run `python pipeline/fetch.py` first (or pass --fetch here).
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 from pathlib import Path
 
@@ -40,6 +41,12 @@ def real_photo(url: str | None, placeholders: set[str]) -> str | None:
     return None if url is None or url in placeholders else url
 
 
+def last_completed_season(today: dt.date | None = None) -> int:
+    """Most recent NFL season that has finished, Super Bowl included (played in February)."""
+    today = today or dt.date.today()
+    return today.year - 1 if today.month >= 3 else today.year - 2
+
+
 def build(years: list[int] | None = None) -> None:
     d = F.draft()
     links = F.roster_links()
@@ -56,8 +63,13 @@ def build(years: list[int] | None = None) -> None:
     stats_by_id = {k: g for k, g in stats.groupby("player_id")}
 
     OUT.mkdir(parents=True, exist_ok=True)
-    all_years = sorted(d.season.unique())
-    years = years or all_years
+    # Only offer classes whose rookies have played a full season; a class drafted this
+    # spring has barely played and would rank near-random.
+    all_years = [int(y) for y in sorted(d.season.unique()) if y <= last_completed_season()]
+    years = [y for y in (years or all_years) if y in all_years]
+    for stale in OUT.glob("[0-9]*.json"):
+        if int(stale.stem) not in all_years:
+            stale.unlink()
     report = []
 
     for year in years:
