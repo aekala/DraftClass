@@ -1,0 +1,6 @@
+# Downloaded nflverse data (re-fetch with fetch.py). The headshot fingerprint cache is
+# kept, since rebuilding it means downloading ~11,000 images.
+raw/*
+!raw/portrait_fingerprints.json
+.venv/
+__pycache__/
